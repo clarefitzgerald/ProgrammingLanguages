@@ -1,0 +1,236 @@
+; COSC 3410 - Project 1
+; [Program uses impcore instructions to make user-defined functions that:
+; 1-Get the sum of consecutive integers
+; 2-evaluate exponents and logarithms
+; 3- determine if a number is prime, get the nth prime, get the sum of the first n primes,
+;    and determine if two numbers are relatively prime
+; 4- Evaluates the number of ways k items can be chosen from a collection of n items
+; 5- Converts a decimal number to binary form]
+; @author [Clare Fitzgerald]
+; Instructor [Brylow]
+; TA-BOT:MAILTO clare.fitzgerald@marquette.edu
+;------------------------------------------------------------------------------------------------------
+;GLOBAL VARIABLES
+(val total 0)  ;Global variable mostly used to hold the output, isn't always an actual total
+(val count 0)  ;Used for loops 
+(val count2 0) ;Used for nested loops or in functions that call other functions that have to use the 
+               ;other count variable
+(val temp 0)   ;Used to hold a value that will be used later on, sometimes used as a total2 for the
+               ;same reason count2 is used
+(val sign 1)   ;Used to hold the sign of the input, if necessary
+;------------------------------------------------------------------------------------------------------
+; QUESTION 1: SUM OF CONSECUTIVE INTEGERS
+(define sigma (m n)
+(set total (+ (/ (- (* n (+ n 1)) (* m ( + m 1))) 2) m ) ;difference of summation formula of n and m
+))
+
+;------------------------------------------------------------------------------------------------------
+;QUESTION 2: EXPONENT AND LOGARITHM FUNCTION
+
+(define exp (b n) ;evaluates exponent b^n
+ (begin 
+  (set count 1) ;Resets count
+  (if ( = n 0 ) (set b 1) (set temp b)) ;Checks for special case n=0
+   (while (< count n)
+    (begin 
+    (set b (* b temp)) 
+    (set count (+ count 1))
+    ))
+ b))
+
+(define log (b m) ;evaluates logarithm logb(m)
+ (begin
+  (set count 0) ;Resets count
+  (if ( = m 1 ) (set count 0) (begin  ;Checks for special case m=1
+   (while (> (/ m b) 0) ;needs to stop before m reaches 0
+    (begin
+    (set m (/ m b)) ;loop divides m by b, impcore does floor division
+    (set count (+ count 1)) ;count represents the exponent (or in this case the answer)
+    ))))
+ count))
+
+;------------------------------------------------------------------------------------------------------
+;QUESTION 3: PRIME NUMBER FUNCTIONS
+
+(define prime? (n) ;returns 1 if a number is prime, 0 if not prime
+ (begin
+ (if (= n 0) (set total 0) (set total 1))
+ (set count 2)
+  (while (and (< count n) (= total 1)) ;once total is set to 0, loop ends, this acts as a break line
+   (begin (if (= (mod n count) 0) (set total 0) total) ;check if there is anything that divides n
+   (set count (+ count 1))))
+ (if (= n 1) (set total 0) total) ;special case of 1 being not prime, else do nothing
+ total))
+
+(define nthprime (n) ;returns nth prime number
+ (begin
+ (set temp 2)
+ (set count2 1)
+   (while (!= n 0)
+    (begin 
+     (if (= (prime? count2) 1) ;uses prime? function to determine if number is prime
+     (begin (set temp count2) (set n (- n 1))) temp);if prime, set the temp variable to count2,
+                                                    ;if not prime, do nothing
+   (set count2 (+ count2 1) ))) temp)) 
+
+(define sumprimes (n)  ;sum of first n primes
+ (begin 
+ (set total 0)
+ (while (!= n 0)
+  (begin 
+   (set total (+ total (nthprime n)))
+   (set n (- n 1))
+))total))
+
+
+(define relprime?  (m n) 
+ (if (= (GCD m n ) 1) 1 0)) ;m and n are relatively prime
+                            ; Greatest common factor is 1
+                            ;only common divisor is 1 
+
+(define GCD (p q) ;HELPER FUNCTION: This is from the book on page 24
+ (begin 
+ (set temp 0)
+ (while (!= (set temp (mod p q)) 0)
+  (begin
+   (set p q)
+   (set q temp)))
+  q))
+
+;------------------------------------------------------------------------------------------------------
+;QUESTION 4: BINOMIAL COEFFICIENTS
+;technically, this doesn't cause arithmetic overflow when handling bigger numbers.
+;It gives "CPU TIME EXHAUSTED" instead
+
+(define choose (n k)
+(begin
+ (if (= k 0) (set total 1)
+   (if (= k n) (set total 1) (set total (+ (choose (- n 1) k) (choose (- n 1) (- k 1))))))total))
+
+(define factorial (f); HELPER FUNCTION: taken from lecture
+ (if (< f 1) 1 (* f (factorial (- f 1)))))
+;------------------------------------------------------------------------------------------------------
+
+;QUESTION 5: DECIMAL-TO-BINARY CONVERSION
+(define binary (m)
+ (begin
+  (if (< m 0) (begin (set sign -1) (set m (* m -1))) (set sign 1))
+  (set total 0) ;binary number will be stored in total by adding powers of 10 
+  (set count2 0) ;this will be the exponent of 10
+  (while (> m 0) (begin 
+    (if (= (mod m 2) 1) 
+       (begin (set total (+ total (exp 10 count2)))) ;then, add 10^count2
+        total)
+	(set count2 (+ count2 1)) ;else, do nothing to total 
+        (set m (/ m 2)) ;floor divide m by 2
+       ))
+(set total (* total sign))	
+ total))
+
+;------------------------------------------------------------------------------------------------------
+;Test Cases
+;------------------------------------------------------------------------------------------------------
+;Question 1
+
+(check-expect (sigma 2 4)  9)
+(check-expect (sigma 4 9)  39)
+(check-expect (sigma 15 17) 48)
+
+;Question 2
+(check-expect (exp 4 3)  64)
+(check-expect (exp 5 3) 125)
+(check-expect (exp 13 2) 169)
+(check-expect (exp 0 7)  0)
+(check-expect (exp 5 0) 1)
+(check-expect (exp 10 2) 100)
+(check-expect (log 5 1) 0)
+(check-expect (log 13 169) 2)
+(check-expect (log 5 125) 3)
+(check-expect (log 4 256) 4)
+(check-expect (log 13 170) 2)
+
+;Question 3
+(check-expect (prime? 0) 0) ;positive integers, I included zero anyways 
+(check-expect (prime? 1) 0)
+(check-expect (prime? 2) 1)
+(check-expect (prime? 3) 1)
+(check-expect (prime? 11) 1)
+(check-expect (prime? 13) 1)
+(check-expect (prime? 15) 0)
+(check-expect (prime? 20) 0)
+(check-expect (prime? 132) 0)
+(check-expect (nthprime 5) 11) ;positive integer input
+(check-expect (nthprime 8) 19)
+(check-expect (nthprime 25) 97)
+(check-expect (sumprimes 4) 17);nonnegative integer inputs
+(check-expect (sumprimes 0) 0)
+(check-expect (sumprimes 1) 2)
+(check-expect (sumprimes 2) 5)
+(check-expect (sumprimes 40) 3087)
+(check-expect (relprime? 2 3) 1)
+(check-expect (relprime? 5 10) 0)
+(check-expect (relprime? 6 16) 0)
+(check-expect (relprime? 15 16) 1)
+
+;Question 4
+(check-expect (choose 1 0) 1)
+(check-expect (choose 1 1) 1)
+(check-expect (choose 2 2) 1)
+(check-expect (choose 8 4) 70)
+(check-expect (choose 6 4) 15)
+(check-expect (choose 100 100) 1)
+(check-expect (choose 8 2) 28)
+(check-expect (choose 188 2) 17578)
+(check-expect (choose 9 4) 126)
+(check-expect (choose 100 4) 3921225) ;technically, this doesn't cause arithmetic overflow. 
+                                       ;It gives "CPU TIME EXHAUSTED" instead 
+;Question 5
+(check-expect (binary 10) 1010)
+(check-expect (binary 0) 0)
+(check-expect (binary 1) 1)
+(check-expect (binary 2) 10)
+(check-expect (binary 3) 11)
+(check-expect (binary 6) 110)
+(check-expect (binary 5) 101)
+(check-expect (binary 7) 111)
+(check-expect (binary 13) 1101)
+(check-expect (binary 15) 1111)
+(check-expect (binary 25) 11001)
+(check-expect (binary 33) 100001)
+(check-expect (binary 52) 110100)
+(check-expect (binary -5) -101)
+(check-expect (binary -52) -110100)
+
+;run with ~brylow/cosc3410/Projects/impcore
+
+
+*******************************************************************************
+----------Test 01-sigma (4 points)----------
+=== hw1-sigma.imp.test             ===	
+
+All 8 tests passed.
+
+
+
+----------Test 02-explog (4 points)----------
+=== hw1-explog.imp.test            ===	
+
+All 9 tests passed.
+
+
+
+----------Test 03-prime (4 points)----------
+=== hw1-prime.imp.test             ===	
+
+
+
+----------Test 04-binomial (4 points)----------
+=== hw1-binomial.imp.test          ===	
+
+
+
+----------Test 05-dec2bin (4 points)----------
+=== hw1-dec2bin.imp.test           ===	
+
+All 11 tests passed.
+
