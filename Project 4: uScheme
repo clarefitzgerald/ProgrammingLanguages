@@ -1,0 +1,208 @@
+ ; COSC 3410 - Project 4
+  ; Implement a function that gets the path to a node in a binary tree and postorder and inorder traversals.
+  ; Explode and Implode digits takes a list and either isolates each digit into an atom in a list or takes each atom of the list and puts them into a number
+  ; Find dot product of two lists
+  ; Various functions dealing with S-expressions (count, countall, mirror, and flatten)
+  ; @author Clare Fitzgerald and Daniel Quiles
+  ; Instructor Brylow
+  ; TA-BOT:MAILTO clare.fitzgerald@marquette.edu daniel.quiles@marquette.edu
+
+(use tree-manual.uscm)
+(val test2 (tree-add 5 (tree-add 3 (tree-add 7 (tree-make-null)))))
+(val test (tree-add 7 (tree-add 5 (tree-add 6 (tree-add 3 (tree-add 1 (tree-add 2 (tree-add 4 (tree-make-null)))))))))
+;QUESTION 1-----------------------------------------------------------------------------
+;Passed all TA Bot test cases
+(val lst '())
+;Helper function needed in order to reset lst each time it is called
+(define path-helper (n t)
+(if (tree? t)
+    (if(=(tree-search n t) #f)
+        #f
+        (if (=(tree-datum t) n) (begin (reverse lst))
+            (if(< n (tree-datum t))
+                (begin 
+                (set lst (cons 'left lst))
+                (path-helper n (tree-left t))
+                )
+                (begin
+                (set lst (cons 'right lst))
+                (path-helper n (tree-right t))))
+        ))
+#f))
+(define path (n t) 
+(begin
+    (set lst '())
+    (path-helper n t)))
+;TEST CASES
+(path 3 test2)
+(path 5 test2)
+(path 7 test2)
+(path 2 test2)
+(path 4 test)
+(path 5 test)
+(path 7 test)
+(path 2 test)
+
+;QUESTION 2------------------------------------------------------------------------------
+
+(define inorder (tree)
+(if (tree-null? tree)
+'()
+
+(append (inorder (tree-left tree)) 
+(cons (tree-datum tree) 
+(inorder (tree-right tree))))
+	))
+
+(define postorder (tree)
+(if (tree-null? tree)
+'()
+(append (postorder (tree-left tree)) 
+(append (postorder (tree-right tree)) 
+(cons (tree-datum tree) '())))
+	)
+)
+
+(inorder test)
+;(1 2 3 4 5 6 7)
+(postorder test)
+;(1 3 2 5 7 6 4)
+(inorder test2)
+(postorder test2)
+
+ ;QUESTION 3-----------------------------------------------------------------------------
+ ;Passed all TA Bot test cases
+(val result 0)
+(val temp 0)
+(val count 0)
+(define length (xs)
+ (if (null? xs) 0 (+ 1 (length (cdr xs)))))
+(define exp (b n) ;evaluates exponent b^n
+ (begin
+  (set count 1) ;Resets count
+  (if ( = n 0 ) (set b 1) (set temp b)) ;Checks for special case n=0
+   (while (< count n)
+    (begin
+    (set b (* b temp))
+    (set count (+ count 1))
+    ))
+ b))
+
+ (define explode-helper (num)
+    (if (= num 0) result
+    (set result (cons (mod num 10) (explode-helper (/ num 10))))))
+
+(define explode-digits (num)
+(begin 
+(set result '())
+(if (= num 0) (set result '(0)) ;Handle case where input is equal to recursion base case 
+(explode-helper num))
+(reverse result)))
+
+
+(define implode-helper (nums) 
+    (if (= nums '()) result
+    (if (= (cdr nums) '()) (set result (+ result (car nums)))
+    (set result (+ (* (exp 10 (- (length nums) 1)) (car nums)) (implode-helper (cdr nums)))))
+))
+
+(define implode-digits (nums)
+    (begin 
+    (set result 0)
+    (if (= nums '() ) (set result '()) ;Handle case where input is equal to recursion base case 
+        (implode-helper nums))
+    result))
+
+
+(implode-digits '(1 8 5 6))
+(implode-digits '(0))
+(implode-digits '())
+(explode-digits 1856)
+(explode-digits 0) 
+
+ ;QUESTION 4-----------------------------------------------------------------------------
+ ;Passed all TA Bot test cases
+(define dot-product (m n)
+  (if (null? m) 0 (begin
+         (+ (* (car m) (car n))
+         (dot-product (cdr m) (cdr n))))))
+(dot-product '(1 2 3) '(10 5 2))
+(dot-product '(1 2 3) '(4 5 6))
+ ;QUESTION 5-----------------------------------------------------------------------------
+(define mirror (xs) ;done
+(if (null? xs)
+'()
+(append (mirror (cdr xs)) (cons (if (atom? xs) xs (if (pair? (car xs)) (mirror (car xs)) (car xs))) '()))))
+
+
+(define flatten (xs) ;done
+(if (null? xs)
+'()
+(if (null? (car xs)) (flatten (cdr xs)) 
+    (if (pair? (car xs))
+     (append (flatten (car xs)) (flatten (cdr xs)))
+        (if (null? (car xs)) (flatten (cdr xs)) (cons (car xs) (flatten (cdr xs))))
+    
+    ))))
+
+(define count (x xs) 
+(length (filter (lambda(n)(equal? x n))  xs))) ;worked for 2 test cases
+
+
+(define countall ( x xs) 
+    (count x (flatten xs)))
+
+(count 'a '(1 b a (c a)))
+;1
+(countall 'a '(1 b a (c a)))
+;2
+(mirror '(1 2 3 4 5))
+;(5 4 3 2 1)
+(mirror '((a (b 5)) (c d) e))
+;(e (d c) ((5 b) a))
+(flatten '((I Ching) (U Thant) (E Coli)))
+;(I Ching U Thant E Coli)
+(flatten '(((((a))))))
+;(a)
+
+
+;run with ~brylow/cosc3410/Projects/uscheme
+
+*******************************************************************************
+----------Test 01-path (4 points)----------
+=== path-tests.test                ===	
+
+All 10 tests passed.
+
+
+
+----------Test 02-traversals (8 points)----------
+=== inorder-traversal.test         ===	
+
+All 8 tests passed.
+
+=== postorder-traversal.test       ===	
+
+All 8 tests passed.
+
+
+
+----------Test 03-exploding-digits (8 points)----------
+=== explode-implode.test           ===	
+
+All 11 tests passed.
+
+
+
+----------Test 04-dot-product (4 points)----------
+=== dot-product.test               ===	
+
+All 6 tests passed.
+
+
+
+----------Test 05-lists-2-s-exps (16 points)----------
+=== list-to-s-exps.test            ===	
+
+All 20 tests passed.
+
