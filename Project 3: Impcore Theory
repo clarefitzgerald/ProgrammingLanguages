@@ -1,1 +1,128 @@
+\documentclass[16pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[small]{titlesec}
+\usepackage{palatino, mathpazo}
+\usepackage{inconsolata}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage[normalem]{ulem}
+
+\newcommand{\ds}{\displaystyle}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\PP}{\mathcal{P}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5ex}
+
+\begin{document}
+    Clare Fitzgerald
+    COSC 3410 HW3
+    \newline
+	\textbf{19a) Proof that segment of code has SET.}
+        \begin{center}
+       \text{(WHILE ($>$ x 1) (if ($=$ 0 (mod x 2)) (SET x (/ x 2)) (SET x (+ (* 3 x) 1))))}
+        \end{center}
+        SET \begin{center} $\frac{ }{\text{SET (x, (/ x 2)) has SET}}$
+        \end{center}
+        IF2
+        \begin{center} 
+        $\frac{\text{SET (x, (/ x 2)) has SET}}{\text{(IF (= 0 (mod x 2)) (SET x (/ x 2)) (SET x (+ (* 3 x) 1))) has SET}}$
+        \end{center} 
+        WHILE2 \begin{center}
+        $\frac{\text{(if (= 0 (mod x 2)) (SET x (/ x 2)) (SET x (+ (* 3 x) 1))) has SET}}{\text{(WHILE ($>$ x 1) (if (= 0 (mod x 2)) (SET x (/ x 2)) (SET x (+ (* 3 x) 1))) has SET}}$
+        \end{center}
+
+        Put Together \begin{center}
+        $\frac{}{\frac{SET (x (+ (* 3 x) 1))}{\frac{\text {(if (= 0 (mod x 2)) (SET x (/ x 2)) (SET x (+ (* 3 x) 1)))}} {\text{(while ($>$ x 1) (if (= 0 (mod x 2)) (SET x (/ x 2)) (SET x (+ (* 3 x) 1)))}}}}$
+        \end{center}
+        
+	
+        \textbf{19b) Example code that has SET but will never use it} 
+        \begin{center} (if (!= x x) (SET x 1) (x))
+        \end{center}
+
+	\textbf{20) Hasn't SET proof system} 
+        \newline
+         \newline LITERAL-HASN'T
+        \begin{center}
+            $\frac{}{\text{(LITERAL($v$)) hasn't SET}}$
+        \end{center}
+        VARIABLE-HASN'T:
+        \begin{center}
+            $\frac{}{\text{(VARIABLE($x$)) hasn't SET}}$
+        \end{center}
+        IF-HASN'T
+        \begin{center} 
+        $\frac{\text{$e_{1}$ hasn't SET $e_{2}$ hasn't SET $e_{3}$ hasn't SET}}{\text{(if $e_{1}$ $e_{2}$ $e_{3}$) hasn't SET}}$
+        \end{center} 
+        WHILE-HASN'T \begin{center}
+        $\frac{\text{ $e_{1}$ hasn't SET $e_{2}$ hasn't SET}}{\text{ While ($e_{1}$ $e_{2}$) hasn't SET}}$
+        \end{center}
+        
+	BEGIN-HASN'T \begin{center}
+        $\frac{\text {$\forall$ $e_i$ $\in $ \{ $e_{1}$ ... $e_{n}$ \}: $e_i$ hasn't SET}} {\text {Begin \{$e_{1}$ ... $e_{n}$\} hasn't SET}}$ , $i \in \{1, ... n\}$
+        \end{center}
+        
+        APPLY-HASN'T \begin{center}
+        $\frac{\text {$\forall$ $e_i$ $\in $ \{ $e_{1}$ ... $e_{n}$ \}: $e_i$ hasn't SET}} {\text {Apply ($f$, $e_{1}$ ... $e_{n}$) hasn't SET}}$ , $i \in \{1, ... n\}$
+        \end{center}
+        
+	\textbf{22) Expression cannot both have SET and hasn't SET} 
+        \newline
+
+        First, we prove the base case for having SET: $ \frac{}{SET(e_{1} , e_{2}) \text{has SET}}$, which is true because there are no premises to the conclusion. Then, we do the induction step:
+
+        \begin{center}
+            $ \frac{}{\frac{SET(e_{1} , e_{2}) \text{ has SET}} {e \text{ has SET}}}$    
+        \end{center} 
+      Because the base case is true, then the induction step will be true for all expressions whose conclusion is has SET. The WHILE, IF, APPLY, and BEGIN all have $e$ contained in them, which means their "has SET" conclusion is true. So we can say, that BEGIN\{$e_1$...$e_n$\} has SET when $e_i$ is the premise. The same goes for the three IF rules, both WHILE rules, and the APPLY rule.
+  \begin{center}
+        $\frac{\text {$e_i$ has SET}} {\text {Begin \{$e_{1}$ ... $e_{n}$\} has SET}}$ , $i \in \{1, ... n\}$
+        \end{center}
+        When the conclusion states "$e$ hasn't SET", our base case must be false, meaning its premises are false. The condition that makes it false is that any subexpression of $e$ cannot have SET (otherwise it would satisfy the premises of the SET rules). Because at least one subexpression needs to have SET to make the has SET conclusion true, this means that to make the hasn't SET conclusion true \textit{none} of the expressions and their subexpressions can contain SET. This makes these mutually exclusive because both cannot be true at the same time.
+        
+Overall Proof:
+\begin{center}
+ $ \frac{}{\frac {\frac{SET(e_{1} , e_{2}) \text{ has SET}} {e \text{ has SET}} XOR \frac{\text{VARIABLE}(v)) \text{ hasn't SET} \| \text{LITERAL}(x)) \text{ hasn't SET} } {e \text{ hasn't SET}}} {e \text{ has SET } \cap \text{ $e$ hasn't SET} = \{\}}}$
+\end{center}
+
+    \textbf{25) Does Lacking SET guarantee unchanged variables? }
+        \newline
+                In this proof system, yes. Since the base cases of "hasn't SET" $\frac{}{VARIABLE(v) \text{hasn't SET}}$ and $\frac{}{LITERAL(x) \text{hasn't SET}}$ do not change variables, there will not be a change to any variables in any of the statements beneath it so as long as the premises hold true (the derivation is valid).  
+                \newline Literal Operational Semantics, $\xi$ is unchanged:
+               $ \frac {}{\langle LITERAL(v), \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle} $
+                \newline Variable Operational Semantics, $\xi$ left unchanged: 
+                $\frac{x \in \xi, x \notin \rho}{\langle VAR(x), \xi, \phi, \rho \rangle  \Downarrow \langle \xi(x), \xi, \phi, \rho \rangle} $
+                \newline Let D represent either of these base cases. Any derivation tree that results in one of these two base cases will not have SET either. This means that by induction a valid derivation for "lacking SET" cannot change variables.
+                Induction step: 
+                \begin{center} $\frac{}{\frac{D}{\langle e, \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle}}$ 
+                \end{center}
+
+                Since our induction step will hold true, then any subexpression lacking SET will also not change variables.
+                Derivation tree for Literal call does not change $\xi$
+                \begin{center}
+              $  \frac{}
+                {\frac{\langle LITERAL(v), \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle}{\frac{\langle APPLY(LITERAL(v)), \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle}{\langle APPLY(e), \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle}}}
+                $
+                \end{center}
+
+                Derivation tree for Variable call does not change $\xi$
+                \begin{center}
+                $\frac{x \in \xi, x \notin \rho}{\frac{\langle VAR(x), \xi, \phi, \rho \rangle  \Downarrow \langle \xi(x), \xi, \phi, \rho \rangle} {\frac {\langle APPLY(VARIABLE(x)), \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle} {\langle APPLY(e), \xi, \phi, \rho \rangle  \Downarrow \langle v, \xi, \phi, \rho \rangle}}}$
+	       \end{center}
+            Since these are both true, the rules that require $e$ hasn't SET as a premise, the conclusions below will be true. 
+	
+
+
+	
+\end{document}
+
 
